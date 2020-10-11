@@ -13,20 +13,18 @@ let vertices = [|
 
 let mutable vertexBufObj = -1
 let mutable vertexArrObj = -1
-let mutable shader = Unchecked.defaultof<_>
+let mutable shader = Unchecked.defaultof<Shader>
 
 type Game(windowSettings , nativeSettings) =
     inherit GameWindow(windowSettings , nativeSettings)
 
     override this.OnLoad() =
-        GL.ClearColor(Color4.CornflowerBlue)
+        GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f)
 
         vertexBufObj <- GL.GenBuffer()
         GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufObj)
 
         GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof<float>, vertices, BufferUsageHint.StaticDraw)
-
-        let dir = Directory.GetCurrentDirectory()
 
         shader <- Shader("shader.vert", "shader.frag")
 
@@ -41,11 +39,6 @@ type Game(windowSettings , nativeSettings) =
         GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufObj)
 
         base.OnLoad()
-
-    override this.OnResize(e) =
-        GL.Viewport(0, 0, this.Size.X, this.Size.Y)
-
-        base.OnResize(e)
 
     override this.OnRenderFrame(e) =
         GL.Clear(ClearBufferMask.ColorBufferBit)
@@ -64,6 +57,11 @@ type Game(windowSettings , nativeSettings) =
         if this.KeyboardState.IsKeyDown(Keys.Escape)
             then this.Close()
         base.OnUpdateFrame(e)
+
+    override this.OnResize(e) =
+        GL.Viewport(0, 0, this.Size.X, this.Size.Y)
+
+        base.OnResize(e)
 
     override this.OnUnload() =
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0)

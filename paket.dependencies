@@ -3,3 +3,4 @@ storage: packages
 source https://api.nuget.org/v3/index.json
 
 nuget OpenTK
+nuget FSharp.Core
