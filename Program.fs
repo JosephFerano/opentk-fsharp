@@ -6,10 +6,10 @@ open OpenTK.Windowing.GraphicsLibraryFramework
 open FsOpenGL
 
 let vertices = [|
-        -0.5 ; -0.5 ; 0.0 ; // Bottom-left vertex
-         0.5 ; -0.5 ; 0.0 ; // Bottom-right vertex
-         0.0 ;  0.5 ; 0.0 ;  // Top vertex
-    |]
+    -0.5f ; -0.5f ; 0.0f ; // Bottom-left vertex
+     0.5f ; -0.5f ; 0.0f ; // Bottom-right vertex
+     0.0f ;  0.5f ; 0.0f ; // Top vertex
+|]
 
 let mutable vertexBufObj = -1
 let mutable vertexArrObj = -1
@@ -19,12 +19,12 @@ type Game(windowSettings , nativeSettings) =
     inherit GameWindow(windowSettings , nativeSettings)
 
     override this.OnLoad() =
-        GL.ClearColor(0.2f, 0.3f, 0.3f, 1.0f)
+        GL.ClearColor(Color4.CornflowerBlue)
 
         vertexBufObj <- GL.GenBuffer()
         GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufObj)
 
-        GL.BufferData(BufferTarget.ArrayBuffer, vertices.Length * sizeof<float>, vertices, BufferUsageHint.StaticDraw)
+        GL.BufferData(BufferTarget.ArrayBuffer, Array.length vertices * sizeof<float32>, vertices, BufferUsageHint.StaticDraw)
 
         shader <- Shader("shader.vert", "shader.frag")
 
@@ -33,7 +33,7 @@ type Game(windowSettings , nativeSettings) =
         vertexArrObj <- GL.GenVertexArray()
         GL.BindVertexArray(vertexArrObj)
 
-        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof<float>, 0)
+        GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof<float32>, 0)
         GL.EnableVertexAttribArray(0)
 
         GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufObj)
