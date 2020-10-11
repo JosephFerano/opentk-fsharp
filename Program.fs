@@ -1,18 +1,24 @@
-﻿open System.IO
-open OpenTK.Graphics.OpenGL4
+﻿open OpenTK.Graphics.OpenGL4
 open OpenTK.Mathematics
 open OpenTK.Windowing.Desktop
 open OpenTK.Windowing.GraphicsLibraryFramework
 open FsOpenGL
 
 let vertices = [|
-    -0.5f ; -0.5f ; 0.0f ; // Bottom-left vertex
-     0.5f ; -0.5f ; 0.0f ; // Bottom-right vertex
-     0.0f ;  0.5f ; 0.0f ; // Top vertex
+     0.5f;  0.5f; 0.0f; // top right
+     0.5f; -0.5f; 0.0f; // bottom right
+    -0.5f; -0.5f; 0.0f; // bottom left
+    -0.5f;  0.5f; 0.0f; // top left
+|]
+
+let indices = [|
+    0u; 1u; 3u; // first triangle
+    1u; 2u; 3u; // second triangle
 |]
 
 let mutable vertexBufObj = -1
 let mutable vertexArrObj = -1
+let mutable elemBufObj = -1
 let mutable shader = Unchecked.defaultof<Shader>
 
 type Game(windowSettings , nativeSettings) =
@@ -23,8 +29,11 @@ type Game(windowSettings , nativeSettings) =
 
         vertexBufObj <- GL.GenBuffer()
         GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufObj)
-
         GL.BufferData(BufferTarget.ArrayBuffer, Array.length vertices * sizeof<float32>, vertices, BufferUsageHint.StaticDraw)
+
+        elemBufObj <- GL.GenBuffer()
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, elemBufObj)
+        GL.BufferData(BufferTarget.ElementArrayBuffer, Array.length indices * sizeof<uint32>, indices, BufferUsageHint.StaticDraw)
 
         shader <- Shader("shader.vert", "shader.frag")
 
@@ -32,11 +41,11 @@ type Game(windowSettings , nativeSettings) =
 
         vertexArrObj <- GL.GenVertexArray()
         GL.BindVertexArray(vertexArrObj)
+        GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufObj)
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, elemBufObj)
 
         GL.VertexAttribPointer(0, 3, VertexAttribPointerType.Float, false, 3 * sizeof<float32>, 0)
         GL.EnableVertexAttribArray(0)
-
-        GL.BindBuffer(BufferTarget.ArrayBuffer, vertexBufObj)
 
         base.OnLoad()
 
@@ -47,7 +56,8 @@ type Game(windowSettings , nativeSettings) =
 
         GL.BindVertexArray(vertexArrObj)
 
-        GL.DrawArrays(PrimitiveType.Triangles, 0, 3)
+        GL.DrawElements(PrimitiveType.Triangles, Array.length indices, DrawElementsType.UnsignedInt, 0)
+//        GL.DrawArrays(PrimitiveType.Triangles, 0, 3)
 
         this.SwapBuffers()
 
@@ -65,9 +75,11 @@ type Game(windowSettings , nativeSettings) =
 
     override this.OnUnload() =
         GL.BindBuffer(BufferTarget.ArrayBuffer, 0)
+        GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0)
         GL.BindVertexArray(0)
         GL.UseProgram(0)
         GL.DeleteBuffer(vertexBufObj)
+        GL.DeleteBuffer(elemBufObj)
         GL.DeleteVertexArray(vertexArrObj)
         GL.DeleteProgram(shader.Handle)
 
